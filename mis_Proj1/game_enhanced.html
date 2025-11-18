@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Baseball Mini-Game — Brody Kelly</title>
+  <style>
+    :root{
+      --bg:#f4f8fb;
+      --card:#ffffff;
+      --accent:#0088cc;
+      --muted:#546774;
+      --success:#28a745;
+      --warning:#ffc107;
+      --danger:#dc3545;
+    }
+    *{box-sizing: border-box}
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin:0;
+      padding:1rem;
+      background: linear-gradient(180deg,var(--bg) 0%, #eaf4ff 100%);
+      color:#123;
+      display:flex;
+      justify-content:center;
+      min-height: 100vh;
+    }
+    .wrap{
+      width:100%;
+      max-width:1200px;
+      background:var(--card);
+      border-radius:14px;
+      box-shadow: 0 12px 30px rgba(2,40,80,0.08);
+      padding:1.25rem;
+      display:grid;
+      grid-template-columns: 1fr 350px;
+      gap:1rem;
+    }
+    header{grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; gap:1rem}
+    header h2{margin:0; color:var(--accent)}
+    .canvas-wrap{
+      background: linear-gradient(180deg,#dff2ff 0%, #fff 100%);
+      border-radius:10px;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:center;
+      position: relative;
+    }
+    canvas{
+      background: linear-gradient(180deg, #6cc2ff 0%, #8fd7ff 100%);
+      border-radius:8px;
+      width:100%;
+      max-width: 800px;
+      height: 400px;
+      display:block;
+      cursor: crosshair;
+      transition: all 0.3s;
+    }
+    canvas:hover {
+      transform: scale(1.01);
+      box-shadow: 0 8px 25px rgba(0,136,204,0.2);
+    }
+    .hud{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .panel{
+      background:rgba(255,255,255,0.9);
+      padding:10px 15px;
+      border-radius:10px;
+      box-shadow:0 6px 18px rgba(2,40,80,0.1);
+      min-width:100px;
+      text-align:center;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.3s;
+    }
+    .panel:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(2,40,80,0.15);
+    }
+    .panel .label{display:block;font-size:12px;color:var(--muted);font-weight: 500}
+    .panel .value{font-weight:700;font-size:18px;color:#0b3b5a}
+    .sidebar{
+      padding:15px;
+      border-left:1px dashed rgba(0,0,0,0.1);
+      display:flex;
+      flex-direction:column;
+      gap:15px;
+      align-items:stretch;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .controls{display:flex;gap:10px;flex-wrap:wrap}
+    button{
+      background:var(--accent);
+      color:white;
+      border:0;
+      padding:12px 16px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,136,204,0.3);
+    }
+    button.secondary{
+      background:#e9f6ff;
+      color:var(--accent);
+      border:1px solid rgba(0,136,204,0.2)
+    }
+    .difficulty-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .difficulty-btn {
+      background: #f0f8ff;
+      color: var(--accent);
+      border: 1px solid rgba(0,136,204,0.3);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+      font-size: 12px;
+      flex: 1;
+      text-align: center;
+      min-width: 70px;
+    }
+    .difficulty-btn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 15px rgba(0,136,204,0.3);
+    }
+    .instructions{
+      font-size:13px;
+      color:var(--muted);
+      background:linear-gradient(180deg,#fff 0,#fbfdff 100%);
+      padding:15px;
+      border-radius:8px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+      border: 1px solid rgba(0,136,204,0.1);
+    }
+    .bases{display:flex;gap:10px;justify-content:center;align-items:center}
+    .base{
+      width:45px;
+      height:45px;
+      border-radius:8px;
+      background:rgba(255,255,255,0.9);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+      font-size: 12px;
+      border: 2px solid #ddd;
+      transition: all 0.3s;
+    }
+    .base.on{
+      background:linear-gradient(135deg,#ffd9a8,#ffefcf);
+      color:#8a4b00;
+      border-color: #ffa500;
+      box-shadow: 0 0 15px rgba(255,165,0,0.4);
+      transform: scale(1.1);
+    }
+    .log{
+      font-size:13px;
+      color:var(--muted);
+      background:#fbfcff;
+      padding:15px;
+      border-radius:8px;
+      height:140px;
+      overflow:auto;
+      border: 1px solid rgba(0,136,204,0.1);
+      backdrop-filter: blur(10px);
+    }
+    .log div {
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .achievements {
+      margin-top: 15px;
+    }
+    .achievement {
+      background: linear-gradient(135deg, #fff9e6, #fffef0);
+      border: 1px solid #ffd700;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #8a4b00;
+      opacity: 0.5;
+      transition: all 0.3s;
+      position: relative;
+    }
+    .achievement.unlocked {
+      opacity: 1;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+      animation: achievementPulse 1s ease-in-out;
+    }
+    @keyframes achievementPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .game-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    .stat-item {
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 11px;
+      border: 1px solid rgba(0,136,204,0.1);
+    }
+    .stat-value {
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 16px;
+    }
+    .power-bar {
+      background: rgba(0,136,204,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      height: 12px;
+      margin-top: 8px;
+      position: relative;
+    }
+    .power-fill {
+      background: linear-gradient(90deg, #00b4d8, #0077b6);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 8px;
+    }
+    .power-indicator {
+      position: absolute;
+      top: -25px;
+      right: 0;
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .sound-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .toggle-switch {
+      width: 40px;
+      height: 20px;
+      background: #ccc;
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle-switch.active {
+      background: var(--success);
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      transition: left 0.3s;
+    }
+    .toggle-switch.active::after {
+      left: 22px;
+    }
+    .strike-zone {
+      position: absolute;
+      border: 2px dashed rgba(255,255,255,0.3);
+      border-radius: 4px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .show-strike-zone .strike-zone {
+      opacity: 1;
+    }
+    footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding-top:10px;margin-top: auto}
+    
+    @media(max-width:1000px){
+      .wrap{grid-template-columns: 1fr; padding:1rem}
+      .sidebar{border-left:0; max-height: none}
+    }
+    @media(max-width:600px){
+      .wrap{grid-template-columns: 1fr; padding:0.5rem}
+      canvas{height:300px}
+      .controls{gap:8px}
+      button{padding:10px 12px;font-size:13px}
+      .sidebar{gap:12px}
+      .difficulty-btn{flex: none; min-width: auto}
+    }
+    @media(max-width:400px){
+      canvas{height:250px}
+      .hud{gap:5px}
+      .panel{min-width:80px;padding:8px 10px}
+      .panel .value{font-size:16px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-label="Enhanced Baseball mini game">
+    <header>
+      <h2>Enhanced Baseball Mini-Game</h2>
+      <div style="font-size:13px;color:#335;color:600">
+        Click canvas or press <strong>Space</strong> to swing • Press <strong>H</strong> for help
+      </div>
+    </header>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="strike-zone" id="strikeZone"></div>
+      <canvas id="field" width="800" height="400" tabindex="0"></canvas>
+
+      <div class="hud">
+        <div class="panel"><span class="label">Inning</span><span id="inning" class="value">1</span></div>
+        <div class="panel"><span class="label">Outs</span><span id="outs" class="value">0</span></div>
+        <div class="panel"><span class="label">Strikes</span><span id="strikes" class="value">0</span></div>
+        <div class="panel"><span class="label">Score</span><span id="score" class="value">0</span></div>
+        <div class="panel"><span class="label">Hits</span><span id="hits" class="value">0</span></div>
+        <div class="panel"><span class="label">Streak</span><span id="streak" class="value">0</span></div>
+      </div>
+    </div>
+
+    <aside class="sidebar" aria-label="Game controls and status">
+      <div class="sound-toggle">
+        <span>Sound Effects</span>
+        <div class="toggle-switch active" id="soundToggle"></div>
+      </div>
+      
+      <div>
+        <div style="font-weight:700;margin-bottom:8px">Difficulty</div>
+        <div class="difficulty-selector">
+          <div class="difficulty-btn active" data-level="easy">Rookie</div>
+          <div class="difficulty-btn" data-level="medium">Pro</div>
+          <div class="difficulty-btn" data-level="hard">All-Star</div>
+          <div class="difficulty-btn" data-level="expert">Hall of Fame</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">Start Game</button>
+        <button id="pitchBtn" class="secondary">Manual Pitch</button>
+        <button id="resetBtn" class="secondary">Reset Game</button>
+      </div>
+
+      <div class="instructions" id="instructions">
+        <strong>How to play</strong>
+        <ul>
+          <li>Click the canvas or press <strong>Space</strong> to swing.</li>
+          <li>Time your swing when the pitch is near the plate.</li>
+          <li>Hit the ball for runs. Miss → strike. 3 strikes → out.</li>
+          <li>3 outs end the inning (bases clear, inning increases).</li>
+          <li>Try different difficulties for different challenges!</li>
+        </ul>
+      </div>
+
+      <div>
+        <div style="font-weight:700;margin-bottom:8px">Bases</div>
+        <div class="bases">
+          <div id="base3" class="base" title="Third base">3B</div>
+          <div id="base2" class="base" title="Second base">2B</div>
+          <div id="base1" class="base" title="First base">1B</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-weight:700;margin-bottom:8px">
+          Batting Power 
+          <div class="power-indicator" id="powerIndicator">0%</div>
+        </div>
+        <div class="power-bar">
+          <div class="power-fill" id="powerFill"></div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-weight:700;margin-bottom:6px">Play Log</div>
+        <div id="log" class="log" aria-live="polite"></div>
+      </div>
+
+      <div class="game-stats">
+        <div class="stat-item">
+          <div>Total Hits</div>
+          <div class="stat-value" id="totalHits">0</div>
+        </div>
+        <div class="stat-item">
+          <div>Total Runs</div>
+          <div class="stat-value" id="totalRuns">0</div>
+        </div>
+        <div class="stat-item">
+          <div>Best Streak</div>
+          <div class="stat-value" id="bestStreak">0</div>
+        </div>
+        <div class="stat-item">
+          <div>Accuracy</div>
+          <div class="stat-value" id="accuracy">0%</div>
+        </div>
+      </div>
+
+      <div class="achievements">
+        <div style="font-weight:700;margin-bottom:8px">Achievements</div>
+        <div class="achievement" id="firstHit">First Hit</div>
+        <div class="achievement" id="homeRun">Home Run Hero</div>
+        <div class="achievement" id="perfectGame">Perfect Pitcher</div>
+        <div class="achievement" id="streakMaster">Streak Master</div>
+        <div class="achievement" id="runFactory">Run Factory</div>
+      </div>
+    </aside>
+
+    <footer>Enhanced Baseball Mini-Game - Experience the excitement of America's pastime!</footer>
+  </div>
+
+<script>
+/*
+  Enhanced Baseball Mini-Game
+  Features:
+  - Multiple difficulty levels
+  - Achievement system
+  - Sound effects
+  - Enhanced visuals and animations
+  - Comprehensive statistics
+  - Power-up mechanics
+  - Mobile responsive design
+*/
+
+// Audio context for sound effects
+let audioContext;
+let soundEnabled = true;
+
+// Game state
+const gameState = {
+  running: false,
+  pitch: null,
+  swing: { active: false, time: 0, power: 0 },
+  score: 0,
+  strikes: 0,
+  outs: 0,
+  inning: 1,
+  bases: { first: false, second: false, third: false },
+  difficulty: 'easy',
+  stats: {
+    totalHits: 0,
+    totalRuns: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    swings: 0,
+    hits: 0,
+    pitchesThrown: 0
+  },
+  achievements: {
+    firstHit: false,
+    homeRun: false,
+    perfectGame: false,
+    streakMaster: false,
+    runFactory: false
+  },
+  particles: []
+};
+
+// Difficulty settings
+const difficulties = {
+  easy: {
+    pitchSpeed: [5.4, 8.2],
+    strikeZoneSize: 80,
+    hitProbability: 0.6,
+    autoPitch: [650, 1100]
+  },
+  medium: {
+    pitchSpeed: [7.0, 10.5],
+    strikeZoneSize: 60,
+    hitProbability: 0.5,
+    autoPitch: [550, 950]
+  },
+  hard: {
+    pitchSpeed: [8.5, 12.0],
+    strikeZoneSize: 45,
+    hitProbability: 0.4,
+    autoPitch: [450, 800]
+  },
+  expert: {
+    pitchSpeed: [10.0, 14.0],
+    strikeZoneSize: 35,
+    hitProbability: 0.3,
+    autoPitch: [350, 650]
+  }
+};
+
+// Canvas setup
+const canvas = document.getElementById('field');
+const ctx = canvas.getContext('2d');
+const canvasWrap = document.getElementById('canvasWrap');
+const strikeZone = document.getElementById('strikeZone');
+
+const W = canvas.width;
+const H = canvas.height;
+
+// UI elements
+const elements = {
+  inning: document.getElementById('inning'),
+  outs: document.getElementById('outs'),
+  strikes: document.getElementById('strikes'),
+  score: document.getElementById('score'),
+  hits: document.getElementById('hits'),
+  streak: document.getElementById('streak'),
+  log: document.getElementById('log'),
+  base1: document.getElementById('base1'),
+  base2: document.getElementById('base2'),
+  base3: document.getElementById('base3'),
+  totalHits: document.getElementById('totalHits'),
+  totalRuns: document.getElementById('totalRuns'),
+  bestStreak: document.getElementById('bestStreak'),
+  accuracy: document.getElementById('accuracy'),
+  powerFill: document.getElementById('powerFill'),
+  powerIndicator: document.getElementById('powerIndicator'),
+  soundToggle: document.getElementById('soundToggle')
+};
+
+// Sound effects
+function initAudio() {
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) {
+    console.log('Web Audio API not supported');
+  }
+}
+
+function playSound(frequency, duration, type = 'sine') {
+  if (!soundEnabled || !audioContext) return;
+  
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+  oscillator.type = type;
+  
+  gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+  
+  oscillator.start(audioContext.currentTime);
+  oscillator.stop(audioContext.currentTime + duration);
+}
+
+function playHitSound(quality) {
+  const sounds = {
+    single: () => playSound(440, 0.2, 'square'),
+    double: () => playSound(554, 0.3, 'square'),
+    triple: () => playSound(659, 0.4, 'square'),
+    homer: () => { playSound(440, 0.2); setTimeout(() => playSound(554, 0.3), 100); }
+  };
+  sounds[quality]?.();
+}
+
+function playMissSound() {
+  playSound(220, 0.15, 'sawtooth');
+}
+
+function playSwingSound() {
+  playSound(880, 0.1, 'triangle');
+}
+
+// Utility functions
+function rnd(min, max) { return Math.random() * (max - min) + min; }
+function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+// Particle system for visual effects
+class Particle {
+  constructor(x, y, color, velocity) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.velocity = velocity;
+    this.life = 1;
+    this.decay = 0.02;
+  }
+  
+  update() {
+    this.x += this.velocity.x;
+    this.y += this.velocity.y;
+    this.life -= this.decay;
+  }
+  
+  draw() {
+    ctx.globalAlpha = this.life;
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+}
+
+// Achievement system
+function checkAchievements() {
+  const stats = gameState.stats;
+  const ach = gameState.achievements;
+  
+  if (stats.totalHits >= 1 && !ach.firstHit) {
+    unlockAchievement('firstHit', 'First Hit! Welcome to baseball!');
+  }
+  
+  if (stats.totalRuns >= 5 && !ach.runFactory) {
+    unlockAchievement('runFactory', 'Run Factory! 5+ runs scored!');
+  }
+  
+  if (stats.bestStreak >= 5 && !ach.streakMaster) {
+    unlockAchievement('streakMaster', 'Streak Master! 5 hit streak!');
+  }
+  
+  if (gameState.score >= 10 && !ach.perfectGame) {
+    unlockAchievement('perfectGame', 'Perfect Game! 10+ runs!');
+  }
+  
+  // Check for home run achievement
+  if (!ach.homeRun && gameState.stats.hits > 0) {
+    // This would require tracking home runs specifically
+  }
+}
+
+function unlockAchievement(id, message) {
+  gameState.achievements[id] = true;
+  const element = document.getElementById(id);
+  element.classList.add('unlocked');
+  log(`🏆 Achievement: ${message}`);
+}
+
+// Enhanced pitch creation
+function createPitch() {
+  const settings = difficulties[gameState.difficulty];
+  const baseY = H * 0.5;
+  const randomOffset = rnd(-H * 0.15, H * 0.15);
+  
+  return {
+    x: W + 20,
+    y: baseY + randomOffset,
+    radius: 9,
+    speed: rnd(...settings.pitchSpeed),
+    struck: false,
+    trail: []
+  };
+}
+
+// Enhanced drawing functions
+function drawField() {
+  // Clear with gradient background
+  const gradient = ctx.createLinearGradient(0, 0, 0, H);
+  gradient.addColorStop(0, '#87CEEB');
+  gradient.addColorStop(1, '#98FB98');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, W, H);
+  
+  // Draw field markings
+  drawFieldMarkings();
+  
+  // Draw pitcher's mound
+  ctx.fillStyle = '#DEB887';
+  ctx.beginPath();
+  ctx.arc(W * 0.4, H * 0.5, 35, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Draw home plate
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(W * 0.15, H * 0.5 - 15);
+  ctx.lineTo(W * 0.15 + 12, H * 0.5 - 8);
+  ctx.lineTo(W * 0.15, H * 0.5 + 15);
+  ctx.lineTo(W * 0.15 - 12, H * 0.5 - 8);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Draw strike zone indicator (when mouse is over canvas)
+  if (canvas.matches(':hover')) {
+    const zoneWidth = difficulties[gameState.difficulty].strikeZoneSize;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.strokeRect(W * 0.15, H * 0.5 - zoneWidth/2, zoneWidth * 2, zoneWidth);
+    ctx.setLineDash([]);
+  }
+  
+  // Draw pitcher
+  drawPitcher();
+  
+  // Draw ball with trail
+  if (gameState.pitch) {
+    drawBall();
+  }
+  
+  // Draw bat with power indicator
+  if (gameState.swing.active) {
+    drawBat();
+  }
+  
+  // Draw particles
+  gameState.particles = gameState.particles.filter(p => {
+    p.update();
+    p.draw();
+    return p.life > 0;
+  });
+}
+
+function drawFieldMarkings() {
+  // Base paths
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.lineWidth = 3;
+  
+  // Draw infield dirt area
+  ctx.fillStyle = '#DEB887';
+  ctx.beginPath();
+  ctx.arc(W * 0.25, H * 0.5, 120, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Baselines
+  ctx.beginPath();
+  ctx.moveTo(W * 0.15, H * 0.5);
+  ctx.lineTo(W * 0.25, H * 0.3);
+  ctx.moveTo(W * 0.25, H * 0.3);
+  ctx.lineTo(W * 0.35, H * 0.5);
+  ctx.moveTo(W * 0.35, H * 0.5);
+  ctx.lineTo(W * 0.25, H * 0.7);
+  ctx.moveTo(W * 0.25, H * 0.7);
+  ctx.lineTo(W * 0.15, H * 0.5);
+  ctx.stroke();
+}
+
+function drawPitcher() {
+  const x = W * 0.42;
+  const y = H * 0.45;
+  
+  // Body
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(x - 6, y, 12, 25);
+  
+  // Head
+  ctx.fillStyle = '#F5DEB3';
+  ctx.beginPath();
+  ctx.arc(x, y - 8, 8, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Arms
+  ctx.fillStyle = '#F5DEB3';
+  ctx.fillRect(x - 15, y + 5, 30, 6);
+}
+
+function drawBall() {
+  const ball = gameState.pitch;
+  
+  // Ball trail
+  if (ball.trail.length > 1) {
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(ball.trail[0].x, ball.trail[0].y);
+    for (let i = 1; i < ball.trail.length; i++) {
+      ctx.lineTo(ball.trail[i].x, ball.trail[i].y);
+    }
+    ctx.stroke();
+  }
+  
+  // Ball
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Ball seams
+  ctx.strokeStyle = '#DC143C';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius - 2, 0.3, Math.PI + 0.3);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.radius - 2, Math.PI + 0.7, Math.PI * 2 + 0.7);
+  ctx.stroke();
+  
+  // Update trail
+  ball.trail.unshift({ x: ball.x, y: ball.y });
+  if (ball.trail.length > 10) {
+    ball.trail.pop();
+  }
+}
+
+function drawBat() {
+  const plateX = W * 0.15 + 6;
+  const plateY = H * 0.5;
+  const progress = Math.min((Date.now() - gameState.swing.time) / 250, 1);
+  const angle = -0.9 + progress * 1.8;
+  
+  ctx.save();
+  ctx.translate(plateX, plateY);
+  ctx.rotate(angle);
+  
+  // Bat with power-based coloring
+  const power = gameState.swing.power;
+  const batColor = power > 70 ? '#FF6B35' : '#8B4513';
+  ctx.fillStyle = batColor;
+  ctx.fillRect(-8, -8, 130, 16);
+  
+  // Bat handle
+  ctx.fillStyle = '#654321';
+  ctx.fillRect(-8, -6, 30, 12);
+  
+  ctx.restore();
+}
+
+// Enhanced collision detection
+function checkCollision() {
+  if (!gameState.pitch || !gameState.swing.active || gameState.pitch.struck) return false;
+  
+  const ball = gameState.pitch;
+  const batX = W * 0.15 + 65;
+  const batY = H * 0.5;
+  const strikeZoneSize = difficulties[gameState.difficulty].strikeZoneSize;
+  
+  const distance = Math.sqrt(
+    Math.pow(ball.x - batX, 2) + Math.pow(ball.y - batY, 2)
+  );
+  
+  if (distance < strikeZoneSize && !ball.struck) {
+    return true;
+  }
+  
+  return false;
+}
+
+// Enhanced hit handling
+function handleHit() {
+  const settings = difficulties[gameState.difficulty];
+  const ball = gameState.pitch;
+  
+  // Calculate hit quality based on timing and power
+  const distance = Math.sqrt(
+    Math.pow(ball.x - (W * 0.15 + 65), 2) + 
+    Math.pow(ball.y - H * 0.5, 2)
+  );
+  
+  const hitQuality = clamp(1 - (distance / settings.strikeZoneSize), 0, 1);
+  const randomFactor = Math.random();
+  
+  let outcome, advance;
+  
+  if (hitQuality > 0.8 && randomFactor > 0.7) {
+    outcome = 'Home Run';
+    advance = 4;
+    createParticleExplosion(ball.x, ball.y, '#FFD700');
+  } else if (hitQuality > 0.6 && randomFactor > 0.5) {
+    outcome = 'Triple';
+    advance = 3;
+    createParticleExplosion(ball.x, ball.y, '#FF6B35');
+  } else if (hitQuality > 0.4 && randomFactor > 0.3) {
+    outcome = 'Double';
+    advance = 2;
+    createParticleExplosion(ball.x, ball.y, '#32CD32');
+  } else if (hitQuality > 0.2) {
+    outcome = 'Single';
+    advance = 1;
+    createParticleExplosion(ball.x, ball.y, '#87CEEB');
+  } else {
+    outcome = 'Foul Ball';
+    advance = 0;
+    createParticleExplosion(ball.x, ball.y, '#FF4500');
+  }
+  
+  // Calculate runs scored
+  let runsScored = 0;
+  if (outcome === 'Home Run') {
+    runsScored = (gameState.bases.first ? 1 : 0) + 
+                 (gameState.bases.second ? 1 : 0) + 
+                 (gameState.bases.third ? 1 : 0) + 1;
+    gameState.bases = { first: false, second: false, third: false };
+  } else if (advance > 0) {
+    // Advance runners
+    for (let i = 0; i < advance; i++) {
+      if (gameState.bases.third) runsScored++;
+      if (gameState.bases.second) gameState.bases.third = true;
+      if (gameState.bases.first) gameState.bases.second = true;
+      gameState.bases.first = true;
+    }
+  }
+  
+  // Update game state
+  gameState.score += runsScored;
+  gameState.stats.totalHits++;
+  gameState.stats.totalRuns += runsScored;
+  gameState.stats.currentStreak++;
+  gameState.stats.bestStreak = Math.max(gameState.stats.bestStreak, gameState.stats.currentStreak);
+  gameState.stats.hits++;
+  
+  // Reset streak on non-hit
+  if (outcome === 'Foul Ball') {
+    gameState.stats.currentStreak = 0;
+  }
+  
+  updateUI();
+  log(`${outcome}! Runs: ${runsScored} | Score: ${gameState.score}`);
+  playHitSound(outcome.toLowerCase().replace(' ', ''));
+  checkAchievements();
+}
+
+// Particle explosion effect
+function createParticleExplosion(x, y, color) {
+  for (let i = 0; i < 8; i++) {
+    gameState.particles.push(new Particle(
+      x, y, color,
+      { x: rnd(-2, 2), y: rnd(-2, 2) }
+    ));
+  }
+}
+
+// Enhanced swing mechanics
+function executeSwing() {
+  if (!gameState.running) {
+    log('Start the game to swing!');
+    return;
+  }
+  
+  gameState.swing.active = true;
+  gameState.swing.time = Date.now();
+  gameState.stats.swings++;
+  
+  // Calculate swing power based on timing
+  const powerProgress = (Date.now() % 1000) / 1000;
+  gameState.swing.power = Math.sin(powerProgress * Math.PI * 2) * 50 + 50;
+  
+  updatePowerBar();
+  playSwingSound();
+  
+  if (!gameState.pitch) {
+    log('You swung, but no pitch yet.');
+  } else {
+    log('Swing!');
+  }
+}
+
+// Power bar update
+function updatePowerBar() {
+  const power = gameState.swing.power;
+  elements.powerFill.style.width = `${power}%`;
+  elements.powerIndicator.textContent = `${Math.round(power)}%`;
+}
+
+// Enhanced pitch update
+function updatePitch() {
+  if (!gameState.pitch) return null;
+  
+  gameState.pitch.x -= gameState.pitch.speed;
+  
+  // Check collision
+  if (checkCollision()) {
+    gameState.pitch.struck = true;
+    return { type: 'hit' };
+  }
+  
+  // Check if pitch passed plate
+  const plateX = W * 0.15 - 20;
+  if (gameState.pitch.x < plateX && !gameState.pitch.struck) {
+    return { type: 'miss' };
+  }
+  
+  // Check if pitch is gone
+  if (gameState.pitch.x < -50) {
+    return { type: 'gone' };
+  }
+  
+  return null;
+}
+
+// Handle miss
+function handleMiss() {
+  gameState.strikes++;
+  gameState.stats.currentStreak = 0;
+  gameState.stats.pitchesThrown++;
+  updateUI();
+  
+  log(`Missed pitch — strike ${gameState.strikes}`);
+  playMissSound();
+  
+  if (gameState.strikes >= 3) {
+    gameState.outs++;
+    log(`Strikeout! Outs: ${gameState.outs}`);
+    gameState.strikes = 0;
+    
+    if (gameState.outs >= 3) {
+      endInning();
+    }
+    updateUI();
+  }
+}
+
+// End inning
+function endInning() {
+  log(`Inning ${gameState.inning} over. Clearing bases.`);
+  gameState.bases = { first: false, second: false, third: false };
+  gameState.outs = 0;
+  gameState.strikes = 0;
+  gameState.inning++;
+  updateUI();
+}
+
+// Enhanced UI update
+function updateUI() {
+  elements.inning.textContent = gameState.inning;
+  elements.outs.textContent = gameState.outs;
+  elements.strikes.textContent = gameState.strikes;
+  elements.score.textContent = gameState.score;
+  elements.hits.textContent = gameState.stats.totalHits;
+  elements.streak.textContent = gameState.stats.currentStreak;
+  
+  // Update base indicators
+  elements.base1.classList.toggle('on', gameState.bases.first);
+  elements.base2.classList.toggle('on', gameState.bases.second);
+  elements.base3.classList.toggle('on', gameState.bases.third);
+  
+  // Update statistics
+  elements.totalHits.textContent = gameState.stats.totalHits;
+  elements.totalRuns.textContent = gameState.stats.totalRuns;
+  elements.bestStreak.textContent = gameState.stats.bestStreak;
+  
+  const accuracy = gameState.stats.swings > 0 ? 
+    Math.round((gameState.stats.hits / gameState.stats.swings) * 100) : 0;
+  elements.accuracy.textContent = `${accuracy}%`;
+}
+
+// Logging function
+function log(message) {
+  const timestamp = new Date().toLocaleTimeString();
+  elements.log.innerHTML = `<div>[${timestamp}] ${message}</div>` + elements.log.innerHTML;
+  
+  // Keep only last 20 messages
+  const messages = elements.log.innerHTML.split('</div>');
+  if (messages.length > 21) {
+    elements.log.innerHTML = messages.slice(0, 21).join('</div>');
+  }
+}
+
+// Enhanced game loop
+let lastTime = 0;
+function gameLoop(timestamp) {
+  if (!gameState.running) return;
+  
+  const deltaTime = timestamp - lastTime;
+  lastTime = timestamp;
+  
+  drawField();
+  
+  const event = updatePitch();
+  if (event) {
+    if (event.type === 'hit') {
+      handleHit();
+      gameState.pitch = null;
+      gameState.swing.active = false;
+    } else if (event.type === 'miss') {
+      handleMiss();
+      gameState.pitch = null;
+      gameState.swing.active = false;
+    } else if (event.type === 'gone') {
+      gameState.pitch = null;
+      gameState.swing.active = false;
+    }
+  }
+  
+  // Auto-pitch new ball
+  if (!gameState.pitch && gameState.running) {
+    const settings = difficulties[gameState.difficulty];
+    if (!gameLoop.nextPitchAt) {
+      gameLoop.nextPitchAt = timestamp + rnd(...settings.autoPitch);
+    }
+    if (timestamp >= gameLoop.nextPitchAt) {
+      gameState.pitch = createPitch();
+      gameLoop.nextPitchAt = null;
+    }
+  }
+  
+  // End swing animation
+  if (gameState.swing.active && Date.now() - gameState.swing.time > 300) {
+    gameState.swing.active = false;
+  }
+  
+  requestAnimationFrame(gameLoop);
+}
+
+// Event listeners
+document.getElementById('startBtn').addEventListener('click', () => {
+  if (!gameState.running) {
+    gameState.running = true;
+    lastTime = performance.now();
+    requestAnimationFrame(gameLoop);
+    log('Game started! Good luck!');
+  } else {
+    log('Game already running.');
+  }
+});
+
+document.getElementById('pitchBtn').addEventListener('click', () => {
+  if (!gameState.running) {
+    log('Start the game first.');
+    return;
+  }
+  if (!gameState.pitch) {
+    gameState.pitch = createPitch();
+    log('Manual pitch thrown!');
+  } else {
+    log('Pitch already in flight.');
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  resetGame();
+});
+
+function resetGame() {
+  gameState.running = false;
+  gameState.pitch = null;
+  gameState.swing.active = false;
+  gameState.score = 0;
+  gameState.strikes = 0;
+  gameState.outs = 0;
+  gameState.inning = 1;
+  gameState.bases = { first: false, second: false, third: false };
+  gameState.stats = {
+    totalHits: 0,
+    totalRuns: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    swings: 0,
+    hits: 0,
+    pitchesThrown: 0
+  };
+  gameState.particles = [];
+  gameState.achievements = {
+    firstHit: false,
+    homeRun: false,
+    perfectGame: false,
+    streakMaster: false,
+    runFactory: false
+  };
+  
+  // Reset UI
+  document.querySelectorAll('.achievement').forEach(el => el.classList.remove('unlocked'));
+  updateUI();
+  log('Game reset! Click Start to play again.');
+}
+
+// Canvas event listeners
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
+  const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+  
+  executeSwing();
+});
+
+canvas.addEventListener('mouseenter', () => {
+  canvasWrap.classList.add('show-strike-zone');
+});
+
+canvas.addEventListener('mouseleave', () => {
+  canvasWrap.classList.remove('show-strike-zone');
+});
+
+// Keyboard controls
+window.addEventListener('keydown', (e) => {
+  e.preventDefault();
+  
+  switch(e.code) {
+    case 'Space':
+      executeSwing();
+      break;
+    case 'KeyH':
+      toggleInstructions();
+      break;
+    case 'KeyR':
+      resetGame();
+      break;
+    case 'Escape':
+      gameState.running = false;
+      break;
+  }
+});
+
+// Difficulty selection
+document.querySelectorAll('.difficulty-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    gameState.difficulty = btn.dataset.level;
+    log(`Difficulty changed to ${btn.textContent}`);
+  });
+});
+
+// Sound toggle
+elements.soundToggle.addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  elements.soundToggle.classList.toggle('active', soundEnabled);
+  if (!audioContext && soundEnabled) {
+    initAudio();
+  }
+  log(`Sound ${soundEnabled ? 'enabled' : 'disabled'}`);
+});
+
+// Toggle instructions visibility
+function toggleInstructions() {
+  const instructions = document.getElementById('instructions');
+  instructions.style.display = instructions.style.display === 'none' ? 'block' : 'none';
+}
+
+// Initialize game
+function init() {
+  updateUI();
+  log('Enhanced Baseball Game ready! Click Start to play.');
+  log('🎯 Tip: Try different difficulty levels for varied challenges!');
+  
+  // Auto-pitch demo after a few seconds
+  setTimeout(() => {
+    if (!gameState.running) {
+      log('🤖 Auto-demo: Starting game...');
+      document.getElementById('startBtn').click();
+    }
+  }, 3000);
+}
+
+// Start the game when page loads
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

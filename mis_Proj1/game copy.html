@@ -1,0 +1,523 @@
+
+  <title>Baseball Mini-Game — Brody Kelly</title>
+  <style>
+    :root{
+      --bg:#f4f8fb;
+      --card:#ffffff;
+      --accent:#0088cc;
+      --muted:#546774;
+    }
+    *{box-sizing: border-box}
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      margin:0;
+      padding:2rem;
+      background: linear-gradient(180deg,var(--bg) 0%, #eaf4ff 100%);
+      color:#123;
+      display:flex;
+      justify-content:center;
+    }
+    .wrap{
+      width:100%;
+      max-width:1000px;
+      background:var(--card);
+      border-radius:14px;
+      box-shadow: 0 12px 30px rgba(2,40,80,0.08);
+      padding:1.25rem;
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:1rem;
+    }
+    header{grid-column:1/-1; display:flex; justify-content:space-between; align-items:center; gap:1rem}
+    header h2{margin:0; color:var(--accent)}
+    .canvas-wrap{
+      background: linear-gradient(180deg,#dff2ff 0%, #fff 100%);
+      border-radius:10px;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:center;
+    }
+    canvas{
+      background: linear-gradient(180deg, #6cc2ff 0%, #8fd7ff 100%);
+      border-radius:8px;
+      width:100%;
+      max-width: 760px;
+      height: 380px;
+      display:block;
+    }
+    .hud{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+    .panel{
+      background:rgba(255,255,255,0.85);
+      padding:8px 12px;
+      border-radius:10px;
+      box-shadow:0 6px 18px rgba(2,40,80,0.05);
+      min-width:90px;
+      text-align:center;
+    }
+    .panel .label{display:block;font-size:12px;color:var(--muted)}
+    .panel .value{font-weight:700;font-size:18px;color:#0b3b5a}
+    .sidebar{
+      padding:10px;
+      border-left:1px dashed rgba(0,0,0,0.05);
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:stretch;
+    }
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    button{
+      background:var(--accent);
+      color:white;
+      border:0;
+      padding:10px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    button.secondary{background:#e9f6ff;color:var(--accent);border:1px solid rgba(0,136,204,0.12)}
+    .instructions{
+      font-size:13px;
+      color:var(--muted);
+      background:linear-gradient(180deg,#fff 0,#fbfdff 100%);
+      padding:10px;border-radius:8px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .bases{display:flex;gap:8px;justify-content:center;align-items:center}
+    .base{width:40px;height:40px;border-radius:6px;background:rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-weight:700}
+    .base.on{background:linear-gradient(180deg,#ffd9a8,#ffefcf); color:#8a4b00}
+    .log{font-size:13px;color:var(--muted); background:#fbfcff;padding:10px;border-radius:8px;height:120px;overflow:auto}
+    footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding-top:4px}
+    @media(max-width:900px){
+      .wrap{grid-template-columns: 1fr; padding:0.75rem}
+      .sidebar{border-left:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-label="Baseball mini game">
+    <header>
+      <h2>Baseball Mini-Game</h2>
+      <div style="font-size:13px;color:#335;color:600">Click canvas or press <strong>Space</strong> to swing</div>
+    </header>
+
+    <div class="canvas-wrap" aria-hidden="false">
+      <canvas id="field" width="760" height="380" tabindex="0"></canvas>
+
+      <div class="hud" aria-hidden="false">
+        <div class="panel"><span class="label">Inning</span><span id="inning" class="value">1</span></div>
+        <div class="panel"><span class="label">Outs</span><span id="outs" class="value">0</span></div>
+        <div class="panel"><span class="label">Strikes</span><span id="strikes" class="value">0</span></div>
+        <div class="panel"><span class="label">Score</span><span id="score" class="value">0</span></div>
+      </div>
+    </div>
+
+    <aside class="sidebar" aria-label="Game controls and status">
+      <div class="controls">
+        <button id="startBtn">Start / Resume</button>
+        <button id="pitchBtn" class="secondary">Throw Pitch</button>
+        <button id="resetBtn" class="secondary">Reset Game</button>
+      </div>
+
+      <div class="instructions">
+        <strong>How to play</strong>
+        <ul>
+          <li>Click the canvas or press <strong>Space</strong> to swing.</li>
+          <li>Time your swing when the pitch is near the plate (center-left area).</li>
+          <li>Hit the ball for singles, doubles, triples, or home runs. Miss -> strike. 3 strikes -> out.</li>
+          <li>3 outs end the inning (bases clear, inning increases).</li>
+        </ul>
+      </div>
+
+      <div>
+        <div style="font-weight:700;margin-bottom:6px">Bases</div>
+        <div class="bases" aria-hidden="false">
+          <div id="base3" class="base" title="Third base">3B</div>
+          <div id="base2" class="base" title="Second base">2B</div>
+          <div id="base1" class="base" title="First base">1B</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-weight:700;margin-bottom:6px">Play Log</div>
+        <div id="log" class="log" aria-live="polite"></div>
+      </div>
+    </aside>
+
+    <footer>Made for your portfolio — drop this file into the same folder as your index page</footer>
+  </div>
+
+<script>
+/*
+  Simple baseball mini-game
+  - Click canvas or press Space to swing
+  - Throw pitch manually (or auto after Start)
+  - Strikes, outs, innings, bases and scoring simulated simply
+*/
+
+// Canvas + drawing
+const canvas = document.getElementById('field');
+const ctx = canvas.getContext('2d');
+
+const W = canvas.width;
+const H = canvas.height;
+
+// Game state
+let running = false;
+let pitch = null; // object when a pitch is active
+let swing = { active: false, time: 0 }; // swing window
+let score = 0, strikes = 0, outs = 0, inning = 1;
+let bases = { first:false, second:false, third:false }; // occupancy
+const maxOuts = 3;
+
+// UI
+const inningEl = document.getElementById('inning');
+const outsEl = document.getElementById('outs');
+const strikesEl = document.getElementById('strikes');
+const scoreEl = document.getElementById('score');
+const logEl = document.getElementById('log');
+const base1El = document.getElementById('base1');
+const base2El = document.getElementById('base2');
+const base3El = document.getElementById('base3');
+
+function log(msg){
+  const t = new Date().toLocaleTimeString();
+  logEl.innerHTML = `<div>[${t}] ${msg}</div>` + logEl.innerHTML;
+}
+
+// Helpers
+function rnd(min,max){return Math.random()*(max-min)+min}
+
+// Pitch creation
+function newPitch(){
+  // pitch starts off-right and moves left toward the plate
+  return {
+    x: W + 20,
+    y: rnd(H*0.35, H*0.65),
+    radius: 9,
+    speed: rnd(5.4, 8.2),
+    struck: false
+  };
+}
+
+// Draw field elements
+function drawField(){
+  ctx.clearRect(0,0,W,H);
+  // sky gradient already in css; draw mound/plate
+  // Pitcher's mound
+  ctx.fillStyle = '#caa879';
+  ctx.beginPath();
+  ctx.ellipse(W*0.35, H*0.5, 40, 30, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // home plate area - plate at left-center
+  const plateX = W*0.18;
+  const plateY = H*0.5;
+  ctx.fillStyle='#fff';
+  ctx.beginPath();
+  ctx.moveTo(plateX, plateY-18);
+  ctx.lineTo(plateX+12, plateY-8);
+  ctx.lineTo(plateX+0, plateY+18);
+  ctx.lineTo(plateX-12, plateY-8);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle='rgba(0,0,0,0.15)';
+  ctx.stroke();
+
+  // strike zone box for reference
+  ctx.strokeStyle='rgba(255,255,255,0.15)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(plateX+10, plateY-70, 140, 140);
+
+  // draw pitcher (simple)
+  ctx.fillStyle='#6b4b2f';
+  ctx.fillRect(W*0.45, H*0.45, 12, 30);
+  ctx.fillStyle='#fff';
+  ctx.fillRect(W*0.455, H*0.43, 6, 6);
+
+  // Draw ball if active
+  if(pitch){
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(pitch.x, pitch.y, pitch.radius, 0, Math.PI*2);
+    ctx.fill();
+    // seams
+    ctx.strokeStyle = '#c33';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(pitch.x, pitch.y, pitch.radius-2, 0.2, Math.PI+0.2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(pitch.x, pitch.y, pitch.radius-2, Math.PI+0.8, Math.PI*2+0.8);
+    ctx.stroke();
+  }
+
+  // Draw bat if swinging
+  if(swing.active){
+    const plateX = W*0.18 + 6;
+    const plateY = H*0.5;
+    // compute swing angle (changes with time)
+    const progress = Math.min((Date.now() - swing.time)/220, 1);
+    const angle = -0.9 + progress*1.8; // from -0.9 to +0.9 rad
+    ctx.save();
+    ctx.translate(plateX, plateY);
+    ctx.rotate(angle);
+    ctx.fillStyle = '#8a4b00';
+    ctx.fillRect(-6, -6, 120, 12);
+    ctx.restore();
+  }
+}
+
+// Advance pitch; return event if any
+function updatePitch(){
+  if(!pitch) return null;
+  pitch.x -= pitch.speed;
+  // if player swung and ball intersects bat area -> hit
+  if(swing.active && !pitch.struck){
+    // simple collision check: distance to plate zone and relative timing
+    const batX = W*0.18 + 60 * Math.cos(0); // coarse
+    const hitZoneLeft = W*0.18 + 6;
+    const hitZoneRight = W*0.18 + 80;
+    const verticalZoneY = H*0.5;
+    if(pitch.x <= hitZoneRight && pitch.x >= hitZoneLeft &&
+       Math.abs(pitch.y - verticalZoneY) < 60 ){
+      pitch.struck = true;
+      return { type:'hit' };
+    }
+  }
+
+  // if pitch passes plate region without being hit -> strike or ball? simplified: strike
+  const platePassX = W*0.18 - 20;
+  if(pitch.x < platePassX && !pitch.struck){
+    // pitch reached catcher area. It's a strike if player didn't swing
+    return { type:'miss' };
+  }
+
+  // if pitch goes offscreen
+  if(pitch.x < -50) return { type:'gone' };
+
+  return null;
+}
+
+// On hit: determine hit strength and apply base advancement & runs
+function handleHit(){
+  // randomize outcome weighted to more singles
+  // 0-59: single, 60-84: double, 85-95: triple, 96-100: homer
+  const r = Math.random()*100;
+  let outcome, advance;
+  if(r < 60){ outcome='Single'; advance=1; }
+  else if(r < 85){ outcome='Double'; advance=2; }
+  else if(r < 96){ outcome='Triple'; advance=3; }
+  else { outcome='Home Run'; advance=4; }
+
+  // Move runners
+  let runsScored = 0;
+  if(outcome === 'Home Run'){
+    // clear bases + batter
+    runsScored += (bases.first?1:0) + (bases.second?1:0) + (bases.third?1:0) + 1;
+    bases.first = bases.second = bases.third = false;
+  } else {
+    // advance current runners `advance` bases and place batter accordingly
+    const newBases = { first:false, second:false, third:false };
+    // if advance >=4 -> treat as homer
+    for(let b = 0; b < advance; b++){
+      // move runners forward one base per step
+      // handle third -> home
+      if(b === 0){
+        // at the batter swing moment: push existing runners
+        if(bases.third) { runsScored++; bases.third = false; }
+        if(bases.second)  { bases.third = true; bases.second = false; }
+        if(bases.first)   { bases.second = true; bases.first = false; }
+        // put batter temporarily on first; additional loops will push further
+        bases.first = true;
+      } else {
+        // additional pushes
+        if(bases.third) { runsScored++; bases.third = false; }
+        if(bases.second) { bases.third = true; bases.second = false; }
+        if(bases.first) { bases.second = true; bases.first = false; }
+      }
+    }
+    // After advances, place batter appropriately (batter is already on first after 1-step)
+    // (Implementation already handles batter placed at first on first iteration)
+  }
+
+  score += runsScored;
+  updateUI();
+  log(`${outcome}! Runs scored: ${runsScored} (Total Score: ${score})`);
+}
+
+// When a miss (pitch passes) occurs
+function handleMiss(){
+  strikes++;
+  updateUI();
+  log(`Missed pitch — strike ${strikes}.`);
+  if(strikes >= 3){
+    outs++;
+    log(`Strikeout! Outs: ${outs}`);
+    strikes = 0;
+    // clear some swing state; don't clear bases on strikeout
+    if(outs >= maxOuts){
+      endInning();
+    }
+    updateUI();
+  }
+}
+
+// On swing but no collision and still in flight: we count as miss if ball later passes
+function handleSwingNoHit(){
+  // If swing and ball hasn't been hit, nothing immediate. Miss will be processed when pitch passes.
+}
+
+// End inning
+function endInning(){
+  log(`Inning ${inning} over. Clearing bases.`);
+  bases.first = bases.second = bases.third = false;
+  outs = 0;
+  strikes = 0;
+  inning++;
+  updateUI();
+}
+
+// Update UI elements and base indicators
+function updateUI(){
+  inningEl.textContent = inning;
+  outsEl.textContent = outs;
+  strikesEl.textContent = strikes;
+  scoreEl.textContent = score;
+
+  base1El.classList.toggle('on', bases.first);
+  base2El.classList.toggle('on', bases.second);
+  base3El.classList.toggle('on', bases.third);
+}
+
+// Game loop
+let lastTime = 0;
+function loop(t){
+  if(!running) return;
+  // t in ms
+  const dt = t - lastTime;
+  lastTime = t;
+
+  drawField();
+  const event = updatePitch();
+  if(event){
+    if(event.type === 'hit'){
+      handleHit();
+      // clear the pitch after hit
+      pitch = null;
+      swing.active = false;
+    } else if(event.type === 'miss'){
+      handleMiss();
+      pitch = null;
+      swing.active = false;
+    } else if(event.type === 'gone'){
+      pitch = null;
+      swing.active = false;
+      // nothing special
+    }
+  }
+
+  // Auto-throw new pitch after a short delay if none active
+  if(!pitch && running){
+    // throw next pitch after 700-1100ms
+    if(!loop.nextPitchAt) loop.nextPitchAt = t + 650 + Math.random()*450;
+    if(t >= loop.nextPitchAt){
+      pitch = newPitch();
+      loop.nextPitchAt = null;
+    }
+  }
+
+  // fade swing - 250ms window
+  if(swing.active && Date.now() - swing.time > 260){
+    swing.active = false;
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// Controls
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  if(!running){
+    running = true;
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+    log('Game started.');
+  } else {
+    log('Game already running.');
+  }
+});
+
+document.getElementById('pitchBtn').addEventListener('click', ()=>{
+  if(!running) {
+    log('Start the game first (Start / Resume).');
+    return;
+  }
+  if(!pitch){
+    pitch = newPitch();
+    log('Manual pitch thrown.');
+  } else {
+    log('Pitch already in flight.');
+  }
+});
+
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  running = false;
+  pitch = null;
+  swing.active = false;
+  score = 0; strikes = 0; outs = 0; inning = 1;
+  bases.first = bases.second = bases.third = false;
+  updateUI();
+  log('Game reset.');
+});
+
+// Swing (click or space)
+function doSwing(){
+  if(!running){
+    log('Start the game to swing.');
+    return;
+  }
+  swing.active = true;
+  swing.time = Date.now();
+  // if pitch exists but not yet struck, we let updatePitch handle collision
+  // but also provide immediate feedback for early/missed swings
+  if(!pitch){
+    log('You swung, but no pitch yet.');
+  } else {
+    log('Swing!');
+    // if swing occurs but pitch is far, it's probably a miss later; we don't immediately penalize
+  }
+}
+
+canvas.addEventListener('click', (e)=> {
+  doSwing();
+});
+window.addEventListener('keydown', (e)=>{
+  if(e.code === 'Space') {
+    e.preventDefault();
+    doSwing();
+  }
+});
+
+// small accessibility: focus canvas to receive key events
+canvas.addEventListener('keydown', (e)=> {
+  if(e.code === 'Space') {
+    e.preventDefault();
+    doSwing();
+  }
+});
+
+// init UI
+updateUI();
+log('Welcome to Baseball Mini-Game! Click Start to begin.');
+
+// small auto-start demo: comment out if you don't want auto-start
+//document.getElementById('startBtn').click();
+</script>
+</body>
+</html>

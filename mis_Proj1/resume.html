@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume - Brody Kelly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">Brody Kelly</a>
+        <nav class="nav-links">
+            <a href="about.html">About Me</a>
+            <a href="umd.html">Discover UMD</a>
+            <a href="experience.html">Experience</a>
+            <a href="resume.html" class="active">Resume</a>
+            <a href="game.html">Fun Game</a>
+        </nav>
+    </header>
+    <main class="page-content">
+        <h1>Professional Resume</h1>
+        <div class="resume-content">
+            <div class="resume-container">
+                <div class="resume-preview">
+                    <img src="media/Resume.jpg" alt="Brody Kelly Resume" class="resume-image">
+                </div>
+                
+                <div class="download-section">
+                    <h2>Download Options</h2>
+                    <div class="download-options">
+                        <a href="Resume/Resume Brody Kelly (3).pdf" target="_blank" class="download-button">
+                            <svg class="download-icon" viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                            </svg>
+                            View Resume
+                        </a>
+                    </div>
+                    
+                    <div class="social-section">
+                        <h2>Professional Networks</h2>
+                        <div class="social-buttons">
+                            <a href="https://www.linkedin.com/in/brodykelly" target="_blank" class="social-button linkedin-button">
+                                <svg class="social-icon" viewBox="0 0 24 24" width="24" height="24">
+                                    <path fill="currentColor" d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                                </svg>
+                                Connect on LinkedIn
+                            </a>
+                            <a href="https://app.joinhandshake.com/profiles/brodykelly" target="_blank" class="social-button handshake-button">
+                                <svg class="social-icon" viewBox="0 0 24 24" width="24" height="24">
+                                    <path fill="currentColor" d="M11.4 6.2H8.3c-.2 0-.4.1-.4.3 0 .1.1.2.2.3l1.3 1.3-5.2 5.2c-.2.2-.2.4 0 .6l2 2c.1.1.2.1.3.1.1 0 .2 0 .3-.1l5.2-5.2 1.3 1.3c.1.1.2.1.3.2.2 0 .3-.2.3-.4V8.7c0-.3-.1-.5-.3-.6-.3-.1-.5-.2-.8-.2-.1-.5-.3-.9-.7-1.2-.2-.4-.6-.6-1.1-.7z"/>
+                                    <path fill="currentColor" d="M20 3H4C2.3 3 1 4.3 1 6v12c0 1.7 1.3 3 3 3h16c1.7 0 3-1.3 3-3V6c0-1.7-1.3-3-3-3zm1 15c0 .6-.4 1-1 1H4c-.6 0-1-.4-1-1V6c0-.6.4-1 1-1h16c.6 0 1 .4 1 1v12z"/>
+                                </svg>
+                                View on Handshake
+                            </a>
+                        </div>
+                    </div>
+                    <style>
+                        .social-buttons {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 1rem;
+                        }
+                        
+                        .social-button {
+                            display: flex;
+                            align-items: center;
+                            gap: 0.8rem;
+                            padding: 1rem 1.5rem;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 8px;
+                            transition: all 0.3s ease;
+                            font-weight: 500;
+                        }
+                        
+                        .linkedin-button {
+                            background: var(--primary-color);
+                        }
+                        
+                        .handshake-button {
+                            background: #d3ee4a;
+                        }
+                        
+                        .social-button:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                        }
+                        
+                        .social-icon {
+                            flex-shrink: 0;
+                        }
+                        
+                        @media (max-width: 768px) {
+                            .social-buttons {
+                                gap: 0.8rem;
+                            }
+                            
+                            .social-button {
+                                padding: 0.8rem 1.2rem;
+                                font-size: 0.9rem;
+                            }
+                        }
+                    </style>
+                </div>
+            </div>
+        </div>
+        
+        <style>
+            .resume-container {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 3rem;
+                margin-top: 2rem;
+            }
+            
+            .resume-preview {
+                background: white;
+                padding: 2rem;
+                border-radius: 15px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            }
+            
+            .resume-image {
+                width: 100%;
+                height: auto;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            
+            .download-section {
+                padding: 2rem;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            }
+            
+            .download-section h2 {
+                color: var(--primary-color);
+                margin-bottom: 1.5rem;
+                font-size: 1.5rem;
+            }
+            
+            .download-options {
+                margin-bottom: 2rem;
+            }
+            
+            .download-button, .linkedin-button {
+                display: flex;
+                align-items: center;
+                gap: 0.8rem;
+                padding: 1rem 1.5rem;
+                background: var(--primary-color);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                font-weight: 500;
+            }
+            
+            .download-button:hover, .linkedin-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+            
+            .linkedin-button {
+                background: #0077b5;
+                margin-top: 1rem;
+            }
+            
+            .social-section {
+                margin-top: 2rem;
+                padding-top: 2rem;
+                border-top: 2px solid var(--gradient-start);
+            }
+            
+            @media (max-width: 768px) {
+                .resume-container {
+                    grid-template-columns: 1fr;
+                }
+                
+                .download-section {
+                    order: -1;
+                }
+            }
+        </style>
+    </main>
+</body>
+</html>

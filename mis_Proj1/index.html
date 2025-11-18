@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brody Kelly's Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0088cc;
+            --accent-color: #00a8ff;
+            --text-color: #333333;
+            --background-color: #ffffff;
+            --gradient-start: #e3f2fd;
+            --gradient-end: #bbdefb;
+            --nav-height: clamp(60px, 10vh, 80px);
+            --container-padding: clamp(1rem, 5vw, 2rem);
+            --text-size-small: clamp(0.8rem, 2vw, 0.9rem);
+            --text-size-base: clamp(1rem, 2.5vw, 1.1rem);
+            --text-size-large: clamp(1.2rem, 3vw, 1.8rem);
+            --text-size-xl: clamp(2rem, 5vw, 3.5rem);
+            --spacing-small: clamp(0.5rem, 2vw, 1rem);
+            --spacing-base: clamp(1rem, 3vw, 2rem);
+            --spacing-large: clamp(2rem, 5vw, 4rem);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            background: var(--background-color);
+            overflow-x: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--nav-height);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 136, 204, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 var(--container-padding);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                position: sticky;
+            }
+            
+            .nav-links {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                box-shadow: 0 -4px 20px rgba(0, 136, 204, 0.1);
+                padding: var(--spacing-small);
+                display: flex;
+                justify-content: space-around;
+                gap: var(--spacing-small);
+            }
+            
+            .nav-links a {
+                font-size: var(--text-size-small);
+                padding: var(--spacing-small);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                justify-content: flex-start;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding: var(--spacing-small) var(--container-padding);
+            }
+            
+            .nav-links::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .nav-links a {
+                white-space: nowrap;
+                flex: 0 0 auto;
+            }
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+            background: var(--gradient-start);
+        }
+
+        .nav-links a.active {
+            color: white;
+            background: var(--primary-color);
+        }
+
+        .hero {
+            min-height: 100vh;
+            padding: var(--container-padding);
+            padding-top: calc(var(--nav-height) + var(--spacing-large));
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+        }
+
+        @media (max-width: 1024px) {
+            .hero {
+                min-height: auto;
+                padding-bottom: calc(var(--nav-height) + var(--spacing-large));
+            }
+            
+            .content {
+                flex-direction: column-reverse;
+                text-align: center;
+                gap: var(--spacing-large);
+            }
+            
+            .content-text, .content-image {
+                width: 100%;
+            }
+            
+            .profile-image {
+                max-width: min(100%, 400px);
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: var(--text-size-xl);
+            }
+            
+            .tagline {
+                font-size: var(--text-size-large);
+            }
+            
+            .lead, .description {
+                font-size: var(--text-size-base);
+            }
+            
+            .preview-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-base);
+                padding: var(--container-padding);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding-top: var(--spacing-large);
+            }
+            
+            .content {
+                padding: var(--spacing-base);
+            }
+            
+            .profile-image {
+                max-width: 100%;
+            }
+        }
+        
+        .page-previews {
+            padding: 4rem 2rem;
+            background: white;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .preview-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 136, 204, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 136, 204, 0.2);
+        }
+
+        .preview-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preview-description {
+            color: var(--text-color);
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .preview-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .preview-link:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--spacing-large);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--container-padding);
+            flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .content-text {
+            flex: 1;
+        }
+
+        .content-image {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .profile-image {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .tagline {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .lead {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column-reverse;
+                text-align: center;
+                padding: 1.5rem;
+                gap: 2rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .tagline {
+                font-size: 1.5rem;
+            }
+
+            .profile-image {
+                max-width: 300px;
+            }
+        }
+
+        .content {
+            position: relative;
+            max-width: 800px;
+            padding: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(0);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(9, 132, 227, 0.3);
+            background: transparent;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 0 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .content {
+                margin: 1rem;
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+        <header class="header">
+        <a href="index.html" class="logo">Brody Kelly</a>
+        <nav class="nav-links">
+            <a href="about.html">About Me</a>
+            <a href="umd.html">UMN Duluth</a>
+            <a href="experience.html">Experience</a>
+            <a href="resume.html">Resume</a>
+            <a href="game.html">Game</a>
+        </nav>
+    </header>
+    <div class="hero">
+        <div class="content">
+            <div class="content-text">
+                <h1>Hi, I'm Brody Kelly</h1>
+                <div class="professional-intro">
+                    <p class="tagline">Statistics & Analytics</p>
+                    <p class="lead">University of Minnesota Duluth '25</p>
+                    <p class="description">Leveraging statistical analysis and consumer insights to transform data into actionable business strategies.</p>
+                </div>
+            </div>
+            <div class="content-image">
+                <img src="media/Homepage.png" alt="Brody Kelly" class="profile-image">
+            </div>
+        </div>
+    </div>
+
+    <section class="page-previews">
+        <div class="preview-grid">
+            <div class="preview-card">
+                <h3 class="preview-title">About Me</h3>
+                <p class="preview-description">Learn about my background, interests, and journey from St. Michael, Minnesota to UMN Duluth. Discover how athletics shaped my character and approach to challenges.</p>
+                <a href="about.html" class="preview-link">Learn more →</a>
+            </div>
+            
+            <div class="preview-card">
+                <h3 class="preview-title">UMN Duluth Experience</h3>
+                <p class="preview-description">Explore my academic journey at UMN Duluth, where I'm pursuing Statistics with a minor in Consumer Insights and Analytics.</p>
+                <a href="umd.html" class="preview-link">Discover more →</a>
+            </div>
+            
+            <div class="preview-card">
+                <h3 class="preview-title">Professional Experience</h3>
+                <p class="preview-description">View my professional experience and projects, including work with The Bluebird Group and other valuable opportunities.</p>
+                <a href="experience.html" class="preview-link">View experience →</a>
+            </div>
+            
+            <div class="preview-card">
+                <h3 class="preview-title">Fun Baseball Game</h3>
+                <p class="preview-description">Take a break and try out my interactive baseball mini-game, showcasing both my programming skills and love for sports.</p>
+                <a href="game.html" class="preview-link">Play now →</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hobbies Section -->
+    <section id="hobbies" class="hobbies-section" style="scroll-margin-top: 100px;">
+        <div class="container">
+            <h2>My Hobbies</h2>
+            <div class="hobbies-grid">
+                <div class="hobby-card">
+                    <img src="media/Golf.jpeg.png" alt="Golf" class="hobby-image">
+                    <h3>Golf</h3>
+                    <p>Golf is my go-to hobby for relaxation and friendly competition. I enjoy the challenge and the focus it requires, and it's a great way to spend time outdoors with friends.</p>
+                </div>
+                <div class="hobby-card">
+                    <img src="media/Hockey.jpeg.png" alt="Hockey" class="hobby-image">
+                    <h3>Hockey</h3>
+                    <p>Hockey has been a passion of mine since childhood. I love the fast pace, teamwork, and energy of the game. It keeps me active and connected to my community.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section id="video" class="video-section" style="scroll-margin-top: 100px;">
+        <div class="container">
+            <h2>Introduction Video</h2>
+            <div class="video-wrapper">
+                <!-- Replace the src below with your own video link or embed -->
+                <video controls width="100%" poster="media/Homepage.png" style="max-width: 600px; display: block; margin: 0 auto; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,136,204,0.12);">
+                    <source src="Videos/Intro.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+    </section>
+    <style>
+        .content-section {
+            padding: 4rem 2rem;
+            background: #f8f9fa;
+        }
+
+        .hobbies-section {
+            padding: 4rem 2rem;
+            background: #f8f9fa;
+        }
+        .hobbies-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--primary-color);
+        }
+        .hobbies-grid {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .hobby-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 136, 204, 0.08);
+            padding: 2rem;
+            max-width: 350px;
+            flex: 1 1 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .hobby-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,136,204,0.10);
+        }
+
+        .video-section {
+            padding: 4rem 2rem 6rem 2rem;
+            background: #f8f9fa;
+        }
+        .video-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: var(--primary-color);
+        }
+        .video-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .content-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .feature-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .feature-link:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .content-section {
+                padding: 2rem 1rem;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .hobbies-grid {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .hobby-card {
+                max-width: 100%;
+            }
+            .video-section {
+                padding: 2rem 1rem 4rem 1rem;
+            }
+        }
+    </style>
+</body>
+</html>

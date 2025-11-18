@@ -1,0 +1,6 @@
+- [x] Analyze the current PDF link issue in resume.html
+- [x] Check the actual files in the Resume directory
+- [x] Create a PDF resume file (Resume Brody Kelly.pdf exists)
+- [x] Update resume.html to link to Resume Brody Kelly.html
+- [x] Test the download functionality
+- [x] Verify the fix works properly
